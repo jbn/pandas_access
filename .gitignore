@@ -1,3 +1,5 @@
 .idea/
 PandasAccess.iml
 *.pyc
+dist/
+MANIFEST
