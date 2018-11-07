@@ -14,16 +14,16 @@ TABLE_RE = re.compile("CREATE TABLE \[(\w+)\]\s+\((.*?\));",
 DEF_RE = re.compile("\s*\[(\w+)\]\s*(.*?),")
 
 
-def list_tables(rdb_file, encoding="latin-1"):
+def list_tables(rdb_file, encoding="utf-8"):
     """
     :param rdb_file: The MS Access database file.
-    :param encoding: The content encoding of the output. I assume `latin-1`
-        because so many of MS files have that encoding. But, MDBTools may
-        actually be UTF-8.
+    :param encoding: The content encoding of the output. MDBTools
+        print the output in UTF-8.
     :return: A list of the tables in a given database.
     """
-    tables = subprocess.check_output(['mdb-tables', rdb_file]).decode(encoding)
-    return tables.strip().split(" ")
+    # We use -1 (one table name per line) to support stange table names
+    tables = subprocess.check_output(['mdb-tables', '-1', rdb_file]).decode(encoding)
+    return tables.split("\n")
 
 
 def _extract_dtype(data_type):
