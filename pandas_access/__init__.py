@@ -34,7 +34,8 @@ def _extract_dtype(data_type):
     if data_type.startswith('double'):
         return np.float_
     elif data_type.startswith('long'):
-        return np.int_
+        # access CAN have null values on long type, @ pandas 0.24 int null suport is experimental, a float is safer for now.
+        return np.float_
     else:
         return None
 
