@@ -8,10 +8,10 @@ except ImportError:
     from io import BytesIO
 
 
-TABLE_RE = re.compile("CREATE TABLE \[(\w+)\]\s+\((.*?\));",
+TABLE_RE = re.compile("CREATE TABLE \[([a-zA-Z_0-9 ]+)\]\s+\((.*?\));",
                       re.MULTILINE | re.DOTALL)
 
-DEF_RE = re.compile("\s*\[(\w+)\]\s*(.*?),")
+DEF_RE = re.compile("\s*\[([a-zA-Z_0-9 ]+)\]\s*(.*?),")
 
 
 def list_tables(rdb_file, encoding="latin-1"):
@@ -22,8 +22,8 @@ def list_tables(rdb_file, encoding="latin-1"):
         actually be UTF-8.
     :return: A list of the tables in a given database.
     """
-    tables = subprocess.check_output(['mdb-tables', rdb_file]).decode(encoding)
-    return tables.strip().split(" ")
+    tables = get_tables(rdb_file, encoding)
+    return [table for table, _ in tables]
 
 
 def _extract_dtype(data_type):
@@ -48,6 +48,11 @@ def _extract_defs(defs_str):
             defs[m.group(1)] = m.group(2)
     return defs
 
+def get_tables(rdb_file, encoding='utf8'):
+    output = subprocess.check_output(['mdb-schema', rdb_file])
+    lines = output.decode(encoding).splitlines()
+    schema_ddl = "\n".join(l for l in lines if l and not l.startswith('-'))
+    return TABLE_RE.findall(schema_ddl)
 
 def read_schema(rdb_file, encoding='utf8'):
     """
@@ -56,12 +61,9 @@ def read_schema(rdb_file, encoding='utf8'):
         spits out UTF-8, exclusively.
     :return: a dictionary of table -> column -> access_data_type
     """
-    output = subprocess.check_output(['mdb-schema', rdb_file])
-    lines = output.decode(encoding).splitlines()
-    schema_ddl = "\n".join(l for l in lines if l and not l.startswith('-'))
-
+    tables = get_tables(rdb_file, encoding)
     schema = {}
-    for table, defs in TABLE_RE.findall(schema_ddl):
+    for table, defs in tables:
         schema[table] = _extract_defs(defs)
 
     return schema
