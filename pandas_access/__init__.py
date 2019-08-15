@@ -128,6 +128,6 @@ def read_table(rdb_file, table_name, *args, **kwargs):
         if dtypes != {}:
             kwargs['dtype'] = dtypes
 
-    cmd = ['mdb-export', rdb_file, table_name]
+    cmd = ['mdb-export', '-b', 'octal', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     return pd.read_csv(proc.stdout, *args, **kwargs)
