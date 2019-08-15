@@ -35,6 +35,12 @@ def _extract_dtype(data_type):
         return np.float_
     elif data_type.startswith('long'):
         return np.int_
+    elif data_type.startswith('bool'):
+        return np.bool_
+    elif data_type.startswith('text') or data_type.startswith('memo'):
+        return np.str_
+    elif data_type.startswith('ole'):
+        return np.bytes_
     else:
         return None
 
