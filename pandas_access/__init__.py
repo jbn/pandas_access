@@ -1,3 +1,4 @@
+import codecs
 import re
 import subprocess
 import pandas as pd
@@ -130,4 +131,12 @@ def read_table(rdb_file, table_name, *args, **kwargs):
 
     cmd = ['mdb-export', '-b', 'octal', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    return pd.read_csv(proc.stdout, *args, **kwargs)
+    df = pd.read_csv(proc.stdout, *args, **kwargs)
+
+    # Convert octal string to raw bytes
+    for col, dtype in enumerate(df.dtypes):
+        if dtype == 'object':
+            for row in range(df.shape[0]):
+                df.iloc[row, col] = codecs.escape_decode(df.iloc[row, col])[0]
+
+    return df
