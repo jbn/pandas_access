@@ -1,3 +1,4 @@
+import codecs
 import re
 import subprocess
 import pandas as pd
@@ -35,6 +36,12 @@ def _extract_dtype(data_type):
         return np.float_
     elif data_type.startswith('long'):
         return np.int_
+    elif data_type.startswith('bool'):
+        return np.bool_
+    elif data_type.startswith('text') or data_type.startswith('memo'):
+        return np.str_
+    elif data_type.startswith('ole'):
+        return np.bytes_
     else:
         return None
 
@@ -122,6 +129,14 @@ def read_table(rdb_file, table_name, *args, **kwargs):
         if dtypes != {}:
             kwargs['dtype'] = dtypes
 
-    cmd = ['mdb-export', rdb_file, table_name]
+    cmd = ['mdb-export', '-b', 'octal', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    return pd.read_csv(proc.stdout, *args, **kwargs)
+    df = pd.read_csv(proc.stdout, *args, **kwargs)
+
+    # Convert octal string to raw bytes
+    for col, dtype in enumerate(df.dtypes):
+        if dtype == 'object':
+            for row in range(df.shape[0]):
+                df.iloc[row, col] = codecs.escape_decode(df.iloc[row, col])[0]
+
+    return df
