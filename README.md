@@ -18,7 +18,8 @@ $ brew install mdbtools
 ```
 Then, do,
 ```sh
-$ pip install pandas_access
+$ pip wheel .
+$ pip install pandas_access-0.0.1-py3-none-any.whl
 ```
 
 ## Usage
