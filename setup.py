@@ -14,5 +14,5 @@ setup(
     description="A tiny, subprocess-based tool for reading a MS Access database(.rdb) as a Pandas DataFrame.",
     long_description=open(README_FILE).read(),
     data_files=['README.md'],
-    url="https://github.com/jbn/pandas_access"
+    url="https://github.com/bghimire2/pandas_access"
 )
