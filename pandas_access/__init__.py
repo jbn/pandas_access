@@ -8,7 +8,7 @@ except ImportError:
     from io import BytesIO
 
 
-TABLE_RE = re.compile("CREATE TABLE \[(\w+)\]\s+\((.*?\));",
+TABLE_RE = re.compile("CREATE TABLE \[([^\]]+)\]\s*\(([^\;]*)\)\;",
                       re.MULTILINE | re.DOTALL)
 
 DEF_RE = re.compile("\s*\[(\w+)\]\s*([^,]*),?")
