@@ -8,10 +8,10 @@ except ImportError:
     from io import BytesIO
 
 
-TABLE_RE = re.compile("CREATE TABLE \[(\w+)\]\s+\((.*?\));",
+TABLE_RE = re.compile("CREATE TABLE \[([^\]]+)\]\s*\(([^\;]*)\)\;",
                       re.MULTILINE | re.DOTALL)
 
-DEF_RE = re.compile("\s*\[(\w+)\]\s*(.*?),")
+DEF_RE = re.compile("\s*\[(\w+)\]\s*([^,]*),?")
 
 
 def list_tables(rdb_file, encoding="latin-1"):
