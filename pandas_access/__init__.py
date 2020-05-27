@@ -125,3 +125,9 @@ def read_table(rdb_file, table_name, *args, **kwargs):
     cmd = ['mdb-export', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     return pd.read_csv(proc.stdout, *args, **kwargs)
+
+
+def execute_query(rdb_file, query):
+    cmd = f'echo "{query}" | mdb-sql -Fp -d"," {rdb_file}'
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    return pd.read_csv(proc.stdout)
