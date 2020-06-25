@@ -125,3 +125,48 @@ def read_table(rdb_file, table_name, *args, **kwargs):
     cmd = ['mdb-export', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     return pd.read_csv(proc.stdout, *args, **kwargs)
+
+
+def execute_query(rdb_file, query):
+    """
+    Execute a Simple SQL Stringin MS Access database
+    and return a Pandas DataFrame.
+
+    Unless you set `converters_from_schema=False`, this function assumes you
+    want to infer the schema from the Access database's schema. This sets the
+    `dtype` argument of `read_csv`, which makes things much faster, in most
+    cases. If you set the `dtype` keyword argument also, it overrides
+    inferences. The `schema_encoding keyword argument passes through to
+    `read_schema`. The `implicit_string` argument passes through to
+    `to_pandas_schema`.
+
+    I recommend setting `chunksize=k`, where k is some reasonable number of
+    rows. This is a simple interface, that doesn't do basic things like
+    counting the number of rows ahead of time. You may inadvertently start
+    reading a 100TB file into memory. (Although, being a MS product, I assume
+    the Access format breaks after 2^32 bytes -- har, har.)
+
+    :param rdb_file: The MS Access database file.
+    :param table_name: The name of the table to process.
+    :param args: positional arguments passed to `pd.read_csv`
+    :param kwargs: keyword arguments passed to `pd.read_csv`
+    :return: a pandas `DataFrame` (or, `TextFileReader` if you set
+        `chunksize=k`)
+    """
+
+    if kwargs.pop('converters_from_schema', True):
+        specified_dtypes = kwargs.pop('dtype', {})
+        schema_encoding = kwargs.pop('schema_encoding', 'utf8')
+        schemas = to_pandas_schema(read_schema(rdb_file, schema_encoding),
+                                   kwargs.pop('implicit_string', True))
+        dtypes = schemas[table_name]
+        dtypes.update(specified_dtypes)
+        if dtypes != {}:
+            kwargs['dtype'] = dtypes
+
+    cmd = ['mdb-export', rdb_file, table_name]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+
+    cmd = f'echo "{query}" | mdb-sql -Fp -d"," {rdb_file}'
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    return pd.read_csv(proc.stdout, *args, **kwargs)
