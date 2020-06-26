@@ -35,7 +35,7 @@ def _extract_dtype(data_type):
         return np.float_
     if "integer" in data_type:
         return "Int64"
-        return None
+    return None
 
 
 def _extract_defs(defs_str):
