@@ -81,7 +81,7 @@ def to_pandas_schema(schema, implicit_string=True):
             if dtype is not None:
                 sub_schema[column] = dtype
             elif implicit_string:
-                sub_schema[column] = np.str_
+                sub_schema[column] = str
         pd_schema[tbl] = sub_schema
     return pd_schema
 
