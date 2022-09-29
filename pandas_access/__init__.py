@@ -34,7 +34,7 @@ def _extract_dtype(data_type):
     if data_type.startswith('double'):
         return np.float_
     elif data_type.startswith('long'):
-        return np.int_
+        return np.int64
     elif data_type.startswith('text'):
         return np.str_
     elif data_type.startswith('datetime'):
@@ -44,7 +44,7 @@ def _extract_dtype(data_type):
     elif data_type.startswith('currency'):
         return np.float_
     elif data_type.startswith('integer'):
-        return np.int_
+        return np.int64
     elif data_type.startswith('memo'):
         return np.str_
     else:
