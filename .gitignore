@@ -3,3 +3,4 @@ PandasAccess.iml
 *.pyc
 dist/
 MANIFEST
+*.egg-info

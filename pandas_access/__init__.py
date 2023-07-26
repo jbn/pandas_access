@@ -8,13 +8,13 @@ except ImportError:
     from io import BytesIO
 
 
-TABLE_RE = re.compile("CREATE TABLE \[(\w+)\]\s+\((.*?\));",
+TABLE_RE = re.compile("CREATE TABLE \[([^]]+)\]\s+\((.*?\));",
                       re.MULTILINE | re.DOTALL)
 
-DEF_RE = re.compile("\s*\[(\w+)\]\s*(.*?),")
+DEF_RE = re.compile("\s*\[([^]]+)\]\s*(.*?),")
 
 
-def list_tables(rdb_file, encoding="latin-1"):
+def list_tables(rdb_file, encoding="utf-8"):
     """
     :param rdb_file: The MS Access database file.
     :param encoding: The content encoding of the output. I assume `latin-1`
@@ -22,8 +22,8 @@ def list_tables(rdb_file, encoding="latin-1"):
         actually be UTF-8.
     :return: A list of the tables in a given database.
     """
-    tables = subprocess.check_output(['mdb-tables', rdb_file]).decode(encoding)
-    return tables.strip().split(" ")
+    tables = subprocess.check_output(['mdb-tables', "-1", rdb_file]).decode(encoding)
+    return tables.strip().split("\n")
 
 
 def _extract_dtype(data_type):
@@ -33,10 +33,9 @@ def _extract_dtype(data_type):
     data_type = data_type.lower()
     if data_type.startswith('double'):
         return np.float_
-    elif data_type.startswith('long'):
-        return np.int_
-    else:
-        return None
+    if "integer" in data_type:
+        return "Int64"
+    return None
 
 
 def _extract_defs(defs_str):
@@ -82,7 +81,7 @@ def to_pandas_schema(schema, implicit_string=True):
             if dtype is not None:
                 sub_schema[column] = dtype
             elif implicit_string:
-                sub_schema[column] = np.str_
+                sub_schema[column] = str
         pd_schema[tbl] = sub_schema
     return pd_schema
 
