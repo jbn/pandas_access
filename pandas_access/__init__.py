@@ -8,13 +8,13 @@ except ImportError:
     from io import BytesIO
 
 
-TABLE_RE = re.compile("CREATE TABLE \[(\w+)\]\s+\((.*?\));",
+TABLE_RE = re.compile("CREATE TABLE \[([^]]+)\]\s+\((.*?\));",
                       re.MULTILINE | re.DOTALL)
 
-DEF_RE = re.compile("\s*\[(\w+)\]\s*(.*?),")
+DEF_RE = re.compile("\s*\[([^]]+)\]\s*(.*?),")
 
 
-def list_tables(rdb_file, encoding="latin-1"):
+def list_tables(rdb_file, encoding="utf-8"):
     """
     :param rdb_file: The MS Access database file.
     :param encoding: The content encoding of the output. I assume `latin-1`
@@ -22,8 +22,8 @@ def list_tables(rdb_file, encoding="latin-1"):
         actually be UTF-8.
     :return: A list of the tables in a given database.
     """
-    tables = subprocess.check_output(['mdb-tables', rdb_file]).decode(encoding)
-    return tables.strip().split(" ")
+    tables = subprocess.check_output(['mdb-tables', "-1", rdb_file]).decode(encoding)
+    return tables.strip().split("\n")
 
 
 def _extract_dtype(data_type):
@@ -34,7 +34,21 @@ def _extract_dtype(data_type):
     if data_type.startswith('double'):
         return np.float_
     elif data_type.startswith('long'):
-        return np.int_
+        return pd.Int64Dtype()
+    elif data_type.startswith('text'):
+        return np.str_
+    elif data_type.startswith('boolean'):
+        return np.bool_
+    elif data_type.startswith('currency'):
+        return np.float_
+    elif "integer" in data_type:
+        return pd.Int64Dtype()
+    elif data_type.startswith('memo'):
+        return np.str_
+    elif data_type.startswith('datetime'):
+        return np.datetime64
+    elif data_type.startswith('date'):
+        return np.datetime64 # TODO: use a date-only format, if it exists
     else:
         return None
 
@@ -82,7 +96,7 @@ def to_pandas_schema(schema, implicit_string=True):
             if dtype is not None:
                 sub_schema[column] = dtype
             elif implicit_string:
-                sub_schema[column] = np.str_
+                sub_schema[column] = str
         pd_schema[tbl] = sub_schema
     return pd_schema
 
@@ -122,6 +136,6 @@ def read_table(rdb_file, table_name, *args, **kwargs):
         if dtypes != {}:
             kwargs['dtype'] = dtypes
 
-    cmd = ['mdb-export', rdb_file, table_name]
+    cmd = ['mdb-export', '--date-format', '%Y-%m-%d', '--datetime-format', '%Y-%m-%dT%H:%M:%S', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     return pd.read_csv(proc.stdout, *args, **kwargs)
