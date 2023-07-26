@@ -33,9 +33,24 @@ def _extract_dtype(data_type):
     data_type = data_type.lower()
     if data_type.startswith('double'):
         return np.float_
-    if "integer" in data_type:
-        return "Int64"
-    return None
+    elif data_type.startswith('long'):
+        return pd.Int64Dtype()
+    elif data_type.startswith('text'):
+        return np.str_
+    elif data_type.startswith('boolean'):
+        return np.bool_
+    elif data_type.startswith('currency'):
+        return np.float_
+    elif "integer" in data_type:
+        return pd.Int64Dtype()
+    elif data_type.startswith('memo'):
+        return np.str_
+    elif data_type.startswith('datetime'):
+        return np.datetime64
+    elif data_type.startswith('date'):
+        return np.datetime64 # TODO: use a date-only format, if it exists
+    else:
+        return None
 
 
 def _extract_defs(defs_str):
@@ -121,6 +136,6 @@ def read_table(rdb_file, table_name, *args, **kwargs):
         if dtypes != {}:
             kwargs['dtype'] = dtypes
 
-    cmd = ['mdb-export', rdb_file, table_name]
+    cmd = ['mdb-export', '--date-format', '%Y-%m-%d', '--datetime-format', '%Y-%m-%dT%H:%M:%S', rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     return pd.read_csv(proc.stdout, *args, **kwargs)
