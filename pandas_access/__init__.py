@@ -47,6 +47,7 @@ def _extract_dtype(data_type):
         return np.str_
     else:
         return None
+    # TODO: add date and datetime formats here (investigation required)
 
 
 def _extract_defs(defs_str):
@@ -132,6 +133,6 @@ def read_table(rdb_file, table_name, *args, **kwargs):
         if dtypes != {}:
             kwargs['dtype'] = dtypes
 
-    cmd = ['mdb-export', rdb_file, table_name]
+    cmd = ['mdb-export', '--date-format', '%Y-%m-%d', '--datetime-format', '%Y-%m-%dT%H:%M:%S' rdb_file, table_name]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     return pd.read_csv(proc.stdout, *args, **kwargs)
