@@ -1,5 +1,17 @@
 ### Fork of https://github.com/jbn/pandas_access
 
+As of 2023-07-26, this fork incorporates every meaningful upgrade by many contributors. This fork is actively maintained, while upstream is not.
+
+This fork can be added to a `requirements.txt` file like this:
+```
+git+https://github.com/DeflateAwning/pandas_access.git@master#egg=pandas_access
+```
+
+Please Star this repo. Please open Issues on this repo with bug reports, feature requests, and similar.
+
+Other forks are visible using [useful-forks.io](https://useful-forks.github.io/?repo=jbn/pandas_access). Especially interesting forks include:
+* [behrenhoff/pandas_access](https://github.com/behrenhoff/pandas_access): Interesting refactor with classes. Failed to address meaningful bugs, unfortunately.
+
 # What is this?
 
 A tiny, `subprocess`-based tool for reading a 
@@ -24,7 +36,13 @@ If you are on `Debian`, install it via apt:
 $ sudo apt install mdbtools
 ```
 
-Then, do,
+If you are on `Windows`, it's a little tougher. Install `mdbtools` for [Windows](https://github.com/lsgunth/mdbtools-win). Manually add to PATH.
+1. Download the mdb-tools files from Windows link above. Visit the Releases section, then downloadi the part that says "Source Code (zip)".
+2. Extract that to somewhere like `C:/bin/mdbtools-win/mdbtools-win-1.0.0`.
+3. Follow these instructions to [add that folder to your environment path](https://linuxhint.com/add-directory-to-path-environment-variables-windows/) (Method 1, but use the path to the mdbtools executable files).
+4. Restart your computer or just close and re-open the program you're running it from. You can test that it works by opening a terminal and running `mdb-tables --help` and see that it doesn't fail.
+
+Finally, on all OS's:
 ```sh
 $ pip install pandas_access
 ```
