@@ -45,6 +45,10 @@ def _extract_dtype(data_type):
         return pd.Int64Dtype()
     elif data_type.startswith('memo'):
         return np.str_
+    elif data_type.startswith('datetime'):
+        return np.datetime64
+    elif data_type.startswith('date'):
+        return np.datetime64 # TODO: use a date-only format, if it exists
     else:
         return None
     # TODO: add date and datetime formats here (investigation required)
